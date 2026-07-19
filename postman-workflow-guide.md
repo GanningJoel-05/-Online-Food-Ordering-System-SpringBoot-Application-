@@ -1,4 +1,4 @@
-# Postman walkthrough — Food Ordering System
+# Postman walkthrough - Food Ordering System
 
 Base URL for every request below: `http://localhost:8080`
 
@@ -6,7 +6,7 @@ Make sure `docker-compose up -d` and `mvn spring-boot:run` are both running befo
 
 ---
 
-## Step 1 — Register a restaurant owner
+## Step 1 - Register a restaurant owner
 
 **POST** `/api/auth/register`
 
@@ -23,11 +23,11 @@ Body (raw JSON):
 }
 ```
 
-Expected: `201 Created`, response body contains a `token`. **Copy this token** — call it `OWNER_TOKEN`.
+Expected: `201 Created`, response body contains a `token`. **Copy this token** - call it `OWNER_TOKEN`.
 
 ---
 
-## Step 2 — Register a customer
+## Step 2 - Register a customer
 
 **POST** `/api/auth/register`
 
@@ -42,13 +42,13 @@ Body:
 }
 ```
 
-Expected: `201 Created`. **Copy this token** — call it `CUSTOMER_TOKEN`.
+Expected: `201 Created`. **Copy this token** - call it `CUSTOMER_TOKEN`.
 
 > Tip: In Postman, save both tokens as collection variables (`owner_token`, `customer_token`) so you can reference them as `{{owner_token}}` instead of pasting manually every time.
 
 ---
 
-## Step 3 — Login (optional sanity check)
+## Step 3 - Login (optional sanity check)
 
 **POST** `/api/auth/login`
 
@@ -60,11 +60,11 @@ Body:
 }
 ```
 
-Expected: `200 OK`, same shape as register — a fresh token.
+Expected: `200 OK`, same shape as register - a fresh token.
 
 ---
 
-## Step 4 — Create a restaurant (as the owner)
+## Step 4 - Create a restaurant (as the owner)
 
 **POST** `/api/restaurants`
 
@@ -82,13 +82,13 @@ Body:
 }
 ```
 
-Expected: `201 Created`, response includes an `id`. **Copy this** — call it `RESTAURANT_ID`.
+Expected: `201 Created`, response includes an `id`. **Copy this** - call it `RESTAURANT_ID`.
 
-> Try this without the `Authorization` header first — you should get `403 Forbidden`. That proves `@PreAuthorize` is actually blocking unauthenticated writes.
+> Try this without the `Authorization` header first - you should get `403 Forbidden`. That proves `@PreAuthorize` is actually blocking unauthenticated writes.
 
 ---
 
-## Step 5 — Add menu items (as the owner)
+## Step 5 - Add menu items (as the owner)
 
 **POST** `/api/restaurants/{{restaurant_id}}/menu-items`
 
@@ -116,11 +116,11 @@ Repeat with a second item so your order has multiple line items:
 }
 ```
 
-Expected: `201 Created` each time. **Copy both `id` values** — call them `ITEM_1_ID` and `ITEM_2_ID`.
+Expected: `201 Created` each time. **Copy both `id` values** - call them `ITEM_1_ID` and `ITEM_2_ID`.
 
 ---
 
-## Step 6 — Browse restaurants (as anyone — no token needed)
+## Step 6 - Browse restaurants (as anyone — no token needed)
 
 **GET** `/api/restaurants?search=italian&page=0&size=10`
 
@@ -132,7 +132,7 @@ Expected: `200 OK`, full detail including the `menuItems` array — confirms bot
 
 ---
 
-## Step 7 — Place an order (as the customer)
+## Step 7 - Place an order (as the customer)
 
 **POST** `/api/orders`
 
@@ -152,13 +152,13 @@ Body:
 }
 ```
 
-Expected: `201 Created`. Response includes `status: "PLACED"`, a computed `totalAmount` (2×249 + 1×99 = 597.00), and both order items. **Copy the order `id`** — call it `ORDER_ID`.
+Expected: `201 Created`. Response includes `status: "PLACED"`, a computed `totalAmount` (2×249 + 1×99 = 597.00), and both order items. **Copy the order `id`** - call it `ORDER_ID`.
 
-> Try this with the `owner_token` instead of `customer_token` — expect `403 Forbidden`, since `@PreAuthorize("hasRole('CUSTOMER')")` guards this endpoint.
+> Try this with the `owner_token` instead of `customer_token` - expect `403 Forbidden`, since `@PreAuthorize("hasRole('CUSTOMER')")` guards this endpoint.
 
 ---
 
-## Step 8 — View the order
+## Step 8 - View the order
 
 **GET** `/api/orders/{{order_id}}`
 
@@ -174,7 +174,7 @@ Expected: `200 OK`, a paginated list containing this order.
 
 ---
 
-## Step 9 — Walk the order through the state machine (as the owner)
+## Step 9 - Walk the order through the state machine (as the owner)
 
 **PATCH** `/api/orders/{{order_id}}/status`
 
@@ -205,7 +205,7 @@ Each should return `200 OK` with the updated status.
 
 ---
 
-## Step 10 — Prove the state machine actually enforces rules
+## Step 10 - Prove the state machine actually enforces rules
 
 Now that the order is `DELIVERED`, try to move it backward:
 
@@ -225,11 +225,11 @@ Expected: **`409 Conflict`**, with a response body like:
 }
 ```
 
-This is the single most important thing to demo in an interview — it proves the transition map in `OrderService` is doing real enforcement, not just accepting any string.
+This is the single most important thing to demo in an interview - it proves the transition map in `OrderService` is doing real enforcement, not just accepting any string.
 
 ---
 
-## Step 11 — Test customer-side cancellation on a fresh order
+## Step 11 - Test customer-side cancellation on a fresh order
 
 Repeat **Step 7** to place a second order (`ORDER_ID_2`), leaving it in `PLACED` status. Then:
 
@@ -243,20 +243,20 @@ Try cancelling it again — expect `409 Conflict`, since `CANCELLED` is a termin
 
 ---
 
-## Step 12 — Test authorization boundaries
+## Step 12 - Test authorization boundaries
 
 A few negative tests worth showing an interviewer, all of which should fail correctly:
 
 | Request | Token used | Expected result |
 |---|---|---|
-| `PATCH /api/orders/{{order_id}}/status` | `customer_token` | `403` — customers can't drive the state machine forward, only cancel |
-| `POST /api/restaurants` | `customer_token` | `403` — only `RESTAURANT_OWNER`/`ADMIN` can create restaurants |
-| `PUT /api/restaurants/{{restaurant_id}}` | a *different* owner's token | `403` — ownership check in the service layer, not just role check |
-| `GET /api/orders/{{order_id}}` | no `Authorization` header | `401` — this route requires authentication (unlike restaurant browsing) |
+| `PATCH /api/orders/{{order_id}}/status` | `customer_token` | `403` - customers can't drive the state machine forward, only cancel |
+| `POST /api/restaurants` | `customer_token` | `403` - only `RESTAURANT_OWNER`/`ADMIN` can create restaurants |
+| `PUT /api/restaurants/{{restaurant_id}}` | a *different* owner's token | `403` - ownership check in the service layer, not just role check |
+| `GET /api/orders/{{order_id}}` | no `Authorization` header | `401` - this route requires authentication (unlike restaurant browsing) |
 
 ---
 
-## Step 13 — Restaurant owner's incoming orders view
+## Step 13 - Restaurant owner's incoming orders view
 
 **GET** `/api/orders/restaurant/{{restaurant_id}}`
 
@@ -280,7 +280,7 @@ If you'd rather not click through manually every time:
 
 ---
 
-## Quick reference — every endpoint used above
+## Quick reference - every endpoint used above
 
 | Step | Method | Endpoint |
 |---|---|---|
