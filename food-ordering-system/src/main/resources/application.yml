@@ -1,0 +1,36 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: food-ordering-system
+
+  datasource:
+    # Change these to match your local Postgres instance
+    url: jdbc:postgresql://localhost:5432/food_ordering_db
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      # update = auto-create/alter tables from entities. Good for dev.
+      # For a "production-style" resume talking point, mention you'd
+      # switch this to 'validate' and manage schema via Flyway/Liquibase.
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false   # forces you to fetch what you need inside @Transactional, avoids lazy-loading surprises
+
+# Custom JWT properties, read by JwtUtil via @Value
+app:
+  jwt:
+    secret: c29tZXN1cGVyc2VjcmV0a2V5Zm9yZm9vZG9yZGVyaW5nc3lzdGVtY2hhbmdldGhpcw==
+    expiration-ms: 86400000   # 24 hours
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
