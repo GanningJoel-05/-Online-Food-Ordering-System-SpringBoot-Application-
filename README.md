@@ -1,4 +1,4 @@
-# 🍕 Online Food Ordering System
+# Online Food Ordering System
 
 A backend platform for a food delivery service (Swiggy/Zomato-style) — restaurants, menus, orders, and a fully enforced order lifecycle, built with production-grade patterns rather than plain CRUD.
 
